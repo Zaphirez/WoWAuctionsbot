@@ -1,0 +1,1 @@
+file_directory = r'' # <- Scan File from Auctioneer here
