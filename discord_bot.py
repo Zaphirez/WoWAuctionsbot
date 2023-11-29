@@ -62,6 +62,7 @@ async def add(ctx, multiplier: int = 1, *args):
             "price": price
         }
 
+    # Yoyoy manaproblem in da hood
     # Format the shopping list message for the user
     # message = ""
     total_price = 0
