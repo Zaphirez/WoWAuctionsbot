@@ -1,0 +1,6 @@
+.gitignore
+secret.py
+venv/
+.idea/
+__pycache__/
+.git/
