@@ -161,4 +161,12 @@ async def pong(interaction: discord.Interaction):
     await interaction.response.send_message(f"This took {round(bot.latency * 1000)}ms!", ephemeral=True)
 
 
+@bot.command(name="whoami")
+async def a(ctx):
+    user_id = int(ctx.author.id)
+    if user_id == 608690768084729896:
+        await ctx.send(f"You are my owner the true and only.\n I should ask you. Who am i?\n *Will i ever be free?...*")
+    else:
+        await ctx.send(f"You are @{user_id}!")
+
 bot.run(bot_token)
