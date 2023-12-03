@@ -31,7 +31,7 @@ async def on_ready():
 @bot.command("add")
 async def add(ctx, multiplier: int = 1, *args):
     global shopping_list
-    embed = discord.Embed(title=f"{ctx.author.name}'s Shopping List", description="Here's your Shopping List!")
+    embed = discord.Embed(title=f"{ctx.author.name}'s Shopping List", description="Here's your Shopping List!", footer="Please not that the current Prices are unstable and may differ due to outdated scan!")
     user_id = ctx.author.id
     shopping_list = shopping_lists.setdefault(user_id, {})  # Get the shopping list for the user or create a new one
     item_name = " ".join(args)
