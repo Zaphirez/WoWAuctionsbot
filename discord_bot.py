@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import asyncio
-from main import SearchPrice, format_currency
+from main import SearchPrice, format_currency, getlastupdate
 from secret import bot_token
 
 intents = discord.Intents.default()
@@ -31,7 +31,7 @@ async def on_ready():
 @bot.command("add")
 async def add(ctx, multiplier: int = 1, *args):
     global shopping_list
-    embed = discord.Embed(title=f"{ctx.author.name}'s Shopping List", description="Here's your Shopping List!", footer="Please not that the current Prices are unstable and may differ due to outdated scan!")
+    embed = discord.Embed(title=f"{ctx.author.name}'s Shopping List", description="Here's your Shopping List!")
     user_id = ctx.author.id
     shopping_list = shopping_lists.setdefault(user_id, {})  # Get the shopping list for the user or create a new one
     item_name = " ".join(args)
@@ -72,7 +72,8 @@ async def add(ctx, multiplier: int = 1, *args):
         item_price = item_data["price"]
         total_price += quantity * item_price
         total_item_price = format_currency(quantity * item_price)
-        embed.add_field(name=f"{quantity}x {item_name}", value=f" Price: {total_item_price} \n Each: {format_currency(item_price)}", inline=False)
+        embed.add_field(name=f"{quantity}x {item_name}", value=f" Price: {total_item_price} \nEach: {format_currency(item_price)}", inline=False)
+        embed.set_footer(text=f"Please Note that the Prices may\ndiffer due to outdated scan!\nLast Scan: {getlastupdate()}")
         # message += f"{quantity}x {item_name} = {total_item_price}\n"
 
     embed.add_field(name="Total Price:", value=format_currency(total_price), inline=False)
@@ -168,5 +169,15 @@ async def a(ctx):
         await ctx.send(f"You are my owner the true and only.\n I should ask you. Who am i?\n *Will i ever be free?...*")
     else:
         await ctx.send(f"You are @{user_id}!")
+
+
+@bot.command(name="sendmessageforuser")
+async def send(ctx, *message):
+    user_id = ctx.author.id
+    if message:
+        message_text = " ".join(map(str, message))
+        message_text = message_text.replace("\\n", "\n")
+        message_send = await ctx.send(str(message_text))
+        await ctx.message.delete()
 
 bot.run(bot_token)

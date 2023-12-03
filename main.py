@@ -1,5 +1,8 @@
 import re
+import datetime
+from lupa import LuaRuntime
 from Filedir import file_directory
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -9,6 +12,7 @@ def format_currency(price):
     copper = price % 100
 
     return f"{gold}g {silver}s {copper}c"
+
 
 def GetData():
     global item_pricings_list
@@ -27,9 +31,11 @@ def GetData():
                   "stacksize = 1", "numstacks = 0"]
 
     # Create a list of item pricings as tuples, excluding the trash entries
-    item_pricings_list = [(item_name, int(price)) for item_name, price in matches if f"{item_name} = {price}" not in trash_data]
+    item_pricings_list = [(item_name, int(price)) for item_name, price in matches if
+                          f"{item_name} = {price}" not in trash_data]
 
     return item_pricings_list
+
 
 # Print the item pricings
 def SearchPrice(searched_name):
@@ -42,5 +48,21 @@ def SearchPrice(searched_name):
     else:
         print(f"No pricing found for {searched_name}")
 
-# ----------------------------------------------------------------------------------------------------------------------
 
+# Getting Date of last Scan
+def getlastupdate():
+    # Getting Timestamp from File
+    with open(file_directory, "r") as lua_file:
+        lua_code = lua_file.read()
+
+    lua = LuaRuntime(unpack_returned_tuples=True)
+    lua.execute(lua_code)
+
+    timestamp = lua.globals().AUCTIONATOR_LAST_SCAN_TIME
+
+    # Formatting Timestamp to readable Format
+    unformatted_time = datetime.datetime.fromtimestamp(timestamp)
+    formatted_time = unformatted_time.strftime("%d.%m.%y %H:%M")
+    return formatted_time
+
+# ----------------------------------------------------------------------------------------------------------------------
