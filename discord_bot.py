@@ -30,7 +30,7 @@ async def on_ready():
 
 @bot.command("add")
 async def add(ctx, multiplier: int = 1, *args):
-    global shopping_list
+    global shopping_list, reset_shopping_list_after_delay
     embed = discord.Embed(title=f"{ctx.author.name}'s Shopping List", description="Here's your Shopping List!")
     user_id = ctx.author.id
     shopping_list = shopping_lists.setdefault(user_id, {})  # Get the shopping list for the user or create a new one
@@ -72,7 +72,8 @@ async def add(ctx, multiplier: int = 1, *args):
         item_price = item_data["price"]
         total_price += quantity * item_price
         total_item_price = format_currency(quantity * item_price)
-        embed.add_field(name=f"{quantity}x {item_name}", value=f" Price: {total_item_price} \n Each: {format_currency(item_price)}", inline=False)
+        embed.add_field(name=f"{quantity}x {item_name}",
+                        value=f" Price: {total_item_price} \n Each: {format_currency(item_price)}", inline=False)
         # message += f"{quantity}x {item_name} = {total_item_price}\n"
 
     embed.add_field(name="Total Price:", value=format_currency(total_price), inline=False)
@@ -90,23 +91,36 @@ async def add(ctx, multiplier: int = 1, *args):
 
     await ctx.message.delete()
 
+    bot.loop.create_task(reset_shopping_list_after_delay(user_id, 120))
+
+    async def reset_shopping_list_after_delay(user_id, delay_seconds):
+        await asyncio.sleep(delay_seconds)
+        reset(ctx, user_id)
+
 
 @bot.command(name="reset")
-async def reset(ctx):
+async def reset(ctx, user_id):
     global shopping_list, shopping_list_message
-    user_id = ctx.author.id
-    shopping_list = shopping_lists.pop(user_id, None)  # Remove the shopping list for the user
+    if user_id:
+        if user_id in shopping_list_messages:
+            shopping_list = shopping_lists.pop(user_id, None)
+            # Delete the shopping list message
+            shopping_list_message = shopping_list_messages.pop(user_id)
+            await ctx.message.send("DEBUG_MESSAGE: 129123a:a")
+    else:
+        user_id = ctx.author.id
+        shopping_list = shopping_lists.pop(user_id, None)  # Remove the shopping list for the user
 
-    # Check if the user has a shopping list message
-    if user_id in shopping_list_messages:
-        # Delete the shopping list message
-        shopping_list_message = shopping_list_messages.pop(user_id)
+        # Check if the user has a shopping list message
+        if user_id in shopping_list_messages:
+            # Delete the shopping list message
+            shopping_list_message = shopping_list_messages.pop(user_id)
 
-    reset_message = await ctx.send("Shopping List resetted!")
-    await ctx.message.delete()
+        reset_message = await ctx.send("Shopping List resetted!")
+        await ctx.message.delete()
 
-    await asyncio.sleep(1)
-    await reset_message.delete()
+        await asyncio.sleep(1)
+        await reset_message.delete()
 
 
 @bot.command(name="reload")
@@ -168,5 +182,6 @@ async def a(ctx):
         await ctx.send(f"You are my owner the true and only.\n I should ask you. Who am i?\n *Will i ever be free?...*")
     else:
         await ctx.send(f"You are @{user_id}!")
+
 
 bot.run(bot_token)
